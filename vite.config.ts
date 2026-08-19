@@ -15,7 +15,7 @@ export default defineConfig({
     // Proxy pour éviter les problèmes CORS en développement
     proxy: {
       '/api': {
-        target: 'https://api.sabil-al-ilm.org', // Ton backend Django
+        target: 'https://api.myklassa.org', // Ton backend Django
         changeOrigin: true,
         secure: false,
       },
