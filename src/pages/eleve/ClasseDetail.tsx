@@ -1347,7 +1347,7 @@ function CollaborativeWhiteboard({ classeId, seanceId, role }: WhiteboardProps) 
           <button onClick={handleUndo} className="px-2 py-1 text-xs bg-neutral-100 hover:bg-neutral-200 rounded transition">↩ Annuler</button>
           <button onClick={handleClear} className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded transition">🗑️ Effacer</button>
         </div>
-       <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${wsStatus === 'connected' ? 'bg-green-100 text-green-700' : wsStatus === 'connecting' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-600'}`}>
+        <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${wsStatus === 'connected' ? 'bg-green-100 text-green-700' : wsStatus === 'connecting' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-600'}`}>
           {wsStatus === 'connected' ? '● En direct' : wsStatus === 'connecting' ? '⏳ Connexion…' : '✗ Déconnecté'}
         </span>
       </div>
@@ -3432,7 +3432,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
       {/* ═══════════════════════════════════════════════════════════════
       ZONE PRINCIPALE DROITE
       ═══════════════════════════════════════════════════════════════ */}
-      <main className="main-content" style={{ flex: 1, flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
+      <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
             {!activeClass && window.innerWidth >= 768 ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
                 <div style={{ textAlign: 'center', color: '#94a3b8' }}>
@@ -3511,7 +3511,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                     )}
 
                     {role === 'admin' && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)', color: '#fbbf24' }}>
                         👁️ Mode observation
                       </span>
                     )}
