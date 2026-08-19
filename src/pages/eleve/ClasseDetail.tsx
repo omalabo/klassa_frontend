@@ -3432,7 +3432,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
       {/* ═══════════════════════════════════════════════════════════════
       ZONE PRINCIPALE DROITE
       ═══════════════════════════════════════════════════════════════ */}
-      <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
+      <main className="main-content" style={{ flex: 1, flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
             {!activeClass && window.innerWidth >= 768 ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
                 <div style={{ textAlign: 'center', color: '#94a3b8' }}>
@@ -3511,7 +3511,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                     )}
 
                     {role === 'admin' && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)', color: '#fbbf24' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)' }}>
                         👁️ Mode observation
                       </span>
                     )}
