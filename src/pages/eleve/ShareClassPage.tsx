@@ -72,10 +72,18 @@ const sharedClassId = decodeClassId(encodedClassId)
     if (!sharedClassId) return
     setLoadingShared(true)
     setSharedError(false)
-    api.get(`/classes/${sharedClassId}/`)
-      .then(res => setSharedClass(res.data))
-      .catch(() => setSharedError(true))
-      .finally(() => setLoadingShared(false))
+    api.get('/classes/', { params: { disponibles: 'true' } })
+    .then(res => {
+        const allClasses = res.data.results || res.data || []
+        const found = allClasses.find((c: any) => c.id === sharedClassId)
+        if (found) {
+        setSharedClass(found)
+        } else {
+        setSharedError(true)
+        }
+    })
+    .catch(() => setSharedError(true))
+    .finally(() => setLoadingShared(false))
   }, [sharedClassId])
 
   // ── Charger classes disponibles + mes inscriptions ──
