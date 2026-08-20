@@ -19,6 +19,7 @@ import MesDiplomes from './pages/eleve/MesDiplomes'
 import EleveEnregistrements from './pages/eleve/Enregistrements'
 import EleveParametres from './pages/eleve/Parametres'
 import EleveFactures from './pages/eleve/Factures'
+import ShareClassPage from './pages/eleve/ShareClassPage'
 
 // Pages Professeur
 import ProfDashboard from './pages/professeur/Dashboard'
@@ -120,6 +121,7 @@ function App() {
 
 
       <Route path="/auth/register" element={<RegisterPage />} />
+      <Route path="/inscription" element={<ShareClassPage />} />
 
       {/* 🛡️ Routes protégées - nécessitent authentification + rôle */}
       <Route element={<AppLayout />}>
