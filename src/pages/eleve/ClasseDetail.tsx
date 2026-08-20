@@ -4661,7 +4661,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
               <button
                 onClick={() => { if (selectedSeanceForJoin) handleJoinSalle(selectedSeanceForJoin) }}
                 disabled={!selectedSeanceForJoin || joiningSalle}
-                style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: selectedSeanceForJoin ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : '#f1f5f9', color: '#fff', fontSize: 13, fontWeight: 700, cursor: selectedSeanceForJoin ? 'pointer' : 'not-allowed', opacity: selectedSeanceForJoin ? 1 : .5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: selectedSeanceForJoin ? '0 4px 16px rgba(124,58,237,.4)' : 'none', transition: 'all .15s' }}
+                style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: selectedSeanceForJoin ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : '#000', color: '#fff', fontSize: 13, fontWeight: 700, cursor: selectedSeanceForJoin ? 'pointer' : 'not-allowed', opacity: selectedSeanceForJoin ? 1 : .5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: selectedSeanceForJoin ? '0 4px 16px rgba(124,58,237,.4)' : 'none', transition: 'all .15s' }}
               >
                 {joiningSalle ? <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'block' }} />Connexion…</> : <><span>🚀</span>{t('start_this_session')}</>}
               </button>
