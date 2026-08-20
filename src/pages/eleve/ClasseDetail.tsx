@@ -1928,8 +1928,11 @@ const handleUpdateInscription = async (inscriptionId: string, statut: string) =>
 }
 
 const getShareLink = (cls: Class) => {
-  // Encoder l'ID en base64 court (premiers 8 caractères)
-  const encoded = btoa(cls.id).replace(/=/g, '').slice(0, 12)
+  // Encoder l'UUID complet en base64 URL-safe (48 caractères courts)
+  const encoded = btoa(cls.id)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
   return `${window.location.origin}/inscription?c=${encoded}`
 }
 
