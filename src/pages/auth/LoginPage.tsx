@@ -23,6 +23,7 @@ export default function LoginPage() {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const { token, mustChangePassword, user } = useAppSelector(selectAuth)
+  const from = (location.state as any)?.from?.pathname || '/'
   
   // 📡 Mutation RTK Query pour le login
   const [login, { isLoading }] = useLoginMutation()
@@ -37,7 +38,7 @@ export default function LoginPage() {
       return <Navigate to="/eleve/factures" replace />
     }
     // Redirection vers dashboard selon rôle (géré par App.tsx normalement)
-    return <Navigate to="/" replace />
+    return <Navigate to={from} replace />
   }
 
   /**
