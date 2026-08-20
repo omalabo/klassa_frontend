@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Navigate, Link} from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams, Navigate, Link} from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { selectAuth, loginSuccess, loginFailure, setLoading } from '../../store/authSlice'
 import { useLoginMutation } from '../../store/apiSlice'
@@ -21,10 +21,13 @@ export default function LoginPage() {
   
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const dispatch = useAppDispatch()
   const { token, mustChangePassword, user } = useAppSelector(selectAuth)
-  const from = (location.state as any)?.from?.pathname || '/'
+  // 🎯 Page demandée avant login (lien partagé) — lisible dans l'URL ou le state
   
+    const from = searchParams.get('next') || '/'
+
   // 📡 Mutation RTK Query pour le login
   const [login, { isLoading }] = useLoginMutation()
 
@@ -83,7 +86,6 @@ export default function LoginPage() {
         navigate('/eleve/factures', { replace: true })
       } else {
         // Redirection vers la page demandée avant login, ou dashboard par défaut
-        const from = (location.state as any)?.from?.pathname || '/'
         navigate(from, { replace: true })
       }
       
