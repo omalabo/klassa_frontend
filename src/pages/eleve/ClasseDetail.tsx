@@ -3432,7 +3432,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
       {/* ═══════════════════════════════════════════════════════════════
       ZONE PRINCIPALE DROITE
       ═══════════════════════════════════════════════════════════════ */}
-      <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
+      <main className="main-content" style={{ flex: 1, flexDirection: 'column', overflow: 'hidden', minWidth: 0,  display: (!activeClass && window.innerWidth < 768) ? 'none' : 'flex'}}>
             {!activeClass && window.innerWidth >= 768 ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
                 <div style={{ textAlign: 'center', color: '#94a3b8' }}>
@@ -3511,7 +3511,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                     )}
 
                     {role === 'admin' && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)', color: '#fbbf24' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20,fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid rgba(251,191,36,.4)' }}>
                         👁️ Mode observation
                       </span>
                     )}
@@ -3524,7 +3524,7 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: 5,
                       padding: '3px 10px', borderRadius: 20, fontSize: 11,fontWeight: 700,color: '#64748b', border: '1.5px solid #34d399',
-                      color: '#059669', letterSpacing: '.2px',background: '#f0fdf4'
+                     letterSpacing: '.2px',background: '#f0fdf4'
                     }}>
                       📅 {jourStr} {s.heure_debut_reelle?.substring(0,5) || '--:--'} – {fin}
                     </span>
@@ -4620,8 +4620,8 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
           <div style={{ background: '#ffffff', borderRadius: 20, padding: 28, maxWidth: 420, width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,.15)', border: '1px solid #e2e8f0', animation: 'todayPopupIn .2s cubic-bezier(.34,1.56,.64,1)' }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
               <div style={{ fontSize: 40, marginBottom: 10 }}>📅</div>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' }}>{t('which_session_start')}</h3>
-              <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(255,255,255,.5)' }}>{t('multiple_sessions_today')}</p>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1e293b' }}>{t('which_session_start')}</h3>
+<p style={{ margin: '8px 0 0', fontSize: 13, color: '#64748b' }}>{t('multiple_sessions_today')}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
               {todaySeancesForActive.map((s, i) => {
@@ -4633,21 +4633,21 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                     onClick={() => setSelectedSeanceForJoin(s)}
                     style={{
                       padding: '14px 18px', borderRadius: 14, cursor: 'pointer', textAlign: 'left',
-                      background: isSelected ? 'rgba(139,92,246,.35)' : 'rgba(255,255,255,.07)',
-                      border: `2px solid ${isSelected ? 'rgba(139,92,246,.8)' : 'rgba(255,255,255,.12)'}`,
+                      background: isSelected ? '#eef2ff' : '#f8fafc',
+                      border: `2px solid ${isSelected ? '#6366f1' : '#e2e8f0'}`,
                       transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#1e293b', fontVariantNumeric: 'tabular-nums' }}>
                         {s.heure_debut_reelle?.substring(0, 5) || '--:--'} → {fin}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginTop: 2 }}>
+                        </div>
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
                         {s.duree_reelle_minutes || '--'} {t('min')} · {t('session')} {i + 1}
                       </div>
                     </div>
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', border: `2px solid ${isSelected ? '#a78bfa' : 'rgba(255,255,255,.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isSelected ? 'rgba(139,92,246,.4)' : 'transparent', flexShrink: 0 }}>
-                      {isSelected && <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#a78bfa', display: 'block' }} />}
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', border: `2px solid ${isSelected ? '#6366f1' : '#cbd5e1'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isSelected ? '#e0e7ff' : 'transparent', flexShrink: 0 }}>
+                      {isSelected && <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#6366f1', display: 'block' }} />}
                     </div>
                   </button>
                 )
@@ -4656,12 +4656,12 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={() => { setShowSeanceSelectModal(false); setSelectedSeanceForJoin(null) }}
-                style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1.5px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.07)', color: 'rgba(255,255,255,.6)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '12px', borderRadius: 12, border: '1.5px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >{t('cancel')}</button>
               <button
                 onClick={() => { if (selectedSeanceForJoin) handleJoinSalle(selectedSeanceForJoin) }}
                 disabled={!selectedSeanceForJoin || joiningSalle}
-                style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: selectedSeanceForJoin ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,.1)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: selectedSeanceForJoin ? 'pointer' : 'not-allowed', opacity: selectedSeanceForJoin ? 1 : .5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: selectedSeanceForJoin ? '0 4px 16px rgba(124,58,237,.4)' : 'none', transition: 'all .15s' }}
+                style={{ flex: 2, padding: '12px', borderRadius: 12, border: 'none', background: selectedSeanceForJoin ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : '#f1f5f9', color: '#fff', fontSize: 13, fontWeight: 700, cursor: selectedSeanceForJoin ? 'pointer' : 'not-allowed', opacity: selectedSeanceForJoin ? 1 : .5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: selectedSeanceForJoin ? '0 4px 16px rgba(124,58,237,.4)' : 'none', transition: 'all .15s' }}
               >
                 {joiningSalle ? <><span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'block' }} />Connexion…</> : <><span>🚀</span>{t('start_this_session')}</>}
               </button>
