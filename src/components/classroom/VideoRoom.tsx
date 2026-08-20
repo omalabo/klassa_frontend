@@ -733,7 +733,7 @@ function VideoRoomContent({
       <div className="flex-1 min-h-0 relative">
         {/* VideoConference occupe tout l'espace, avec padding bas pour la barre */}
         <div className="absolute inset-0 pb-20">
-          <VideoConference />
+          {connectionState === ConnectionState.Connected && <VideoConference />}
         </div>
 
         {/* ── CHAT MINIATURE ── */}
