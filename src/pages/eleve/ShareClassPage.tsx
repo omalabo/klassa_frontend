@@ -2,7 +2,7 @@
 // Onglet 1 : la classe partagée (inscription directe)
 // Onglet 2 : rechercher d'autres classes
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import { selectAuth } from '../../store/authSlice'
 import api from '../../config/axios'
@@ -18,7 +18,7 @@ export default function ShareClassPage() {
   if (!token) {
     return (
       <Navigate
-        to="/auth/login"
+        to="/login"
         replace
         state={{ from: { pathname: location.pathname + location.search } }}
       />
@@ -30,25 +30,32 @@ export default function ShareClassPage() {
 // ─── Contenu principal (connecté) ────────────────────────────
 function ShareClassContent() {
   const { t } = useAppLanguage()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 const encodedClassId = searchParams.get('c')
 
 // Décoder l'ID depuis base64 court
-const decodeClassId = (encoded: string | null): string | null => {
-if (!encoded) return null
-try {
-    // Ajouter le padding si nécessaire
-    const padded = encoded + '='.repeat((4 - encoded.length % 4) % 4)
-    const decoded = atob(padded)
-    // Vérifier que c'est bien un UUID (36 caractères avec tirets)
-    if (decoded.length >= 8 && /^[a-f0-9-]+$/i.test(decoded)) {
-    return decoded
-    }
-} catch {}
-return null
-}
+const legacyClassId = searchParams.get('classe')  // ← ancien format (rétrocompatibilité)
 
-const sharedClassId = decodeClassId(encodedClassId)
+const decodeClassId = (encoded: string | null): string | null => {
+  if (!encoded) return null
+  try {
+    // Restaurer base64 standard (+ et /) + padding
+    const base64 = encoded
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      + '='.repeat((4 - encoded.length % 4) % 4)
+    const decoded = atob(base64)
+    // Vérifier que c'est bien un UUID valide (36 caractères avec tirets)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (decoded.length === 36 && uuidRegex.test(decoded)) {
+      return decoded
+        }
+    } catch {}
+    return null
+    }
+
+  const sharedClassId = decodeClassId(encodedClassId) || legacyClassId || null
   const { user } = useAppSelector(selectAuth)
   const isEleve = user?.role === 'eleve'
 
@@ -72,19 +79,20 @@ const sharedClassId = decodeClassId(encodedClassId)
     if (!sharedClassId) return
     setLoadingShared(true)
     setSharedError(false)
+    // ✅ Charger depuis l'endpoint public (liste des classes disponibles)
     api.get('/classes/', { params: { disponibles: 'true' } })
-    .then(res => {
+        .then(res => {
         const allClasses = res.data.results || res.data || []
-        const found = allClasses.find((c: any) => c.id === sharedClassId)
+        const found = allClasses.find((c: any) => String(c.id) === String(sharedClassId))
         if (found) {
-        setSharedClass(found)
+            setSharedClass(found)
         } else {
-        setSharedError(true)
+            setSharedError(true)
         }
-    })
-    .catch(() => setSharedError(true))
-    .finally(() => setLoadingShared(false))
-  }, [sharedClassId])
+        })
+        .catch(() => setSharedError(true))
+        .finally(() => setLoadingShared(false))
+    }, [sharedClassId])
 
   // ── Charger classes disponibles + mes inscriptions ──
   const loadAll = useCallback(async () => {
@@ -123,6 +131,7 @@ const sharedClassId = decodeClassId(encodedClassId)
       await api.post('/inscriptions/', { classe: classeId, eleve: user.id, statut: 'en_attente' })
       await loadAll()
       alert(`✅ ${t('request_sent')}`)
+      navigate('/')
     } catch (err: any) {
       const data = err?.response?.data
       const message =
@@ -204,12 +213,11 @@ const sharedClassId = decodeClassId(encodedClassId)
             <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.5px' }}>
               {t('course_details')}
             </p>
-            <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            
+            <div style={{ marginTop: 12, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 10px' }}>
+              <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
               {(cls as any).details_cours || '—'}
             </p>
-            <div style={{ marginTop: 12, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 10px' }}>
-              <p style={{ margin: 0, fontSize: 9, color: '#94a3b8', textTransform: 'uppercase' }}>{t('course_title_program')}</p>
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#1e293b', fontWeight: 600 }}>{cls.programme || '—'}</p>
             </div>
           </div>
         )}
