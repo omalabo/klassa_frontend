@@ -715,13 +715,13 @@ function VideoRoomContent({
       {/* ── HEADER ── */}
       <div className="bg-neutral-900/80 backdrop-blur-sm px-4 py-2.5 flex items-center gap-3 border-b border-neutral-800 z-20 relative">
         <h3 className="text-white font-semibold text-sm">{classe.nom}</h3>
-        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+        {/* <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
           connectionState === ConnectionState.Connected
             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
             : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
         }`}>
           {connectionState === ConnectionState.Connected ? '🔴 En direct' : '⏳ Connexion...'}
-        </span>
+        </span> */}
         {isRecording && (
           <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-danger-500/20 text-danger-400 border border-danger-500/30 animate-pulse">
             ⏺ Enregistrement
@@ -733,7 +733,7 @@ function VideoRoomContent({
       <div className="flex-1 min-h-0 relative">
         {/* VideoConference occupe tout l'espace, avec padding bas pour la barre */}
         <div className="absolute inset-0 pb-20">
-          {connectionState === ConnectionState.Connected && <VideoConference />}
+          <VideoConference />
         </div>
 
         {/* ── CHAT MINIATURE ── */}
