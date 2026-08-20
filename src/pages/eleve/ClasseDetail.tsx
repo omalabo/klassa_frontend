@@ -1928,8 +1928,9 @@ const handleUpdateInscription = async (inscriptionId: string, statut: string) =>
 }
 
 const getShareLink = (cls: Class) => {
-  // ⚠️ Adapte la route si ta page d'inscription est différente
-  return `${window.location.origin}/inscription?classe=${cls.id}`
+  // Encoder l'ID en base64 court (premiers 8 caractères)
+  const encoded = btoa(cls.id).replace(/=/g, '').slice(0, 12)
+  return `${window.location.origin}/inscription?c=${encoded}`
 }
 
 const getShareText = (cls: Class) => {
