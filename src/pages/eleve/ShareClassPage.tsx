@@ -18,9 +18,8 @@ export default function ShareClassPage() {
   if (!token) {
     return (
       <Navigate
-        to="/login"
+        to={`/login?next=${encodeURIComponent(location.pathname + location.search)}`}
         replace
-        state={{ from: { pathname: location.pathname + location.search } }}
       />
     )
   }
