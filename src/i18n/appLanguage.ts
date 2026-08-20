@@ -44,6 +44,11 @@ export function detectAppLanguage(): AppLang {
 // ─── Traductions ────────────────────────────────────────────
 const translations: Record<AppLang, Record<string, string>> = {
   en: {
+    'tab_shared_class': 'Shared class',
+'tab_other_classes': 'Other classes',
+'join_class': 'Join this class',
+'student_account_required': 'A student account is required to register.',
+'class_unavailable': 'Class not found or unavailable.',
     'confirm_validate_session': 'Validate session',
 'confirm_validate_session_msg': 'The schedules will be applied to the session and ALL students will be marked "present (complete course)". Continue?',
 'btn_validate': 'Validate',
@@ -220,6 +225,11 @@ const translations: Record<AppLang, Record<string, string>> = {
   },
 
   fr: {
+    'tab_shared_class': 'Classe partagée',
+'tab_other_classes': 'Autres classes',
+'join_class': 'Rejoindre cette classe',
+'student_account_required': 'Un compte élève est nécessaire pour s\'inscrire.',
+'class_unavailable': 'Classe introuvable ou indisponible.',
     'confirm_validate_session': 'Valider la séance',
 'confirm_validate_session_msg': 'Les horaires seront appliqués à la séance et TOUS les élèves seront marqués "présents (cours complet)". Continuer ?',
 'btn_validate': 'Valider',
@@ -398,6 +408,11 @@ const translations: Record<AppLang, Record<string, string>> = {
     },
 
   es: {
+    'tab_shared_class': 'Clase compartida',
+'tab_other_classes': 'Otras clases',
+'join_class': 'Unirse a esta clase',
+'student_account_required': 'Se necesita una cuenta de estudiante para inscribirse.',
+'class_unavailable': 'Clase no encontrada o no disponible.',
     'confirm_validate_session': 'Validar sesión',
 'confirm_validate_session_msg': 'Los horarios se aplicarán a la sesión y TODOS los estudiantes serán marcados "presentes (curso completo)". ¿Continuar?',
 'btn_validate': 'Validar',
@@ -573,6 +588,11 @@ const translations: Record<AppLang, Record<string, string>> = {
   },
 
   ar: {
+    'tab_shared_class': 'الفصل المشترك',
+'tab_other_classes': 'فصول أخرى',
+'join_class': 'انضم إلى هذا الفصل',
+'student_account_required': 'يلزم حساب طالب للتسجيل.',
+'class_unavailable': 'الفصل غير موجود أو غير متاح.',
     'confirm_validate_session': 'تأكيد الجلسة',
 'confirm_validate_session_msg': 'سيتم تطبيق الجداول على الجلسة وسيتم تسجيل جميع الطلاب كـ "حاضرين (دورة كاملة)". متابعة؟',
 'btn_validate': 'تأكيد',
@@ -748,6 +768,11 @@ const translations: Record<AppLang, Record<string, string>> = {
   },
 
   zh: {
+    'tab_shared_class': '分享的班级',
+'tab_other_classes': '其他班级',
+'join_class': '加入此班级',
+'student_account_required': '需要学生账户才能注册。',
+'class_unavailable': '未找到班级或班级不可用。',
     'confirm_validate_session': '验证课程',
 'confirm_validate_session_msg': '时间表将应用于课程，所有学生将被标记为"出勤（完整课程）"。继续吗？',
 'btn_validate': '验证',
