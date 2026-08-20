@@ -102,10 +102,11 @@ function App() {
   return (
     <Routes>
       {/* 🔐 Routes publiques - accessibles sans authentification */}
-      <Route path="/login" element={
+      {/* <Route path="/login" element={
         // Si déjà connecté, rediriger vers le dashboard approprié
         token ? <Navigate to={getDashboardPath(user)} replace /> : <LoginPage />
-      } />
+      } /> */}
+      <Route path="/login" element={<LoginPage />} />
       
       <Route path="/auth/force-change-password" element={
         // Accès uniquement si mustChangePassword = true
