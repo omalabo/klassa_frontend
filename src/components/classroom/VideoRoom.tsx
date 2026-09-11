@@ -472,6 +472,7 @@ interface ControlBarProps {
   onToggleChat: () => void
   unreadCount: number
   isRecording: boolean
+  isRecordingLoading: boolean
   canRecord: boolean
   onToggleRecording: () => void
 }
@@ -483,6 +484,7 @@ function ControlBar({
   onToggleChat,
   unreadCount,
   isRecording,
+  isRecordingLoading
   canRecord,
   onToggleRecording,
 }: ControlBarProps) {
@@ -662,15 +664,17 @@ interface VideoRoomContentProps {
   isModerator: boolean
   onLeave?: () => void
   isRecording: boolean
+  isRecordingLoading: boolean
   canRecord: boolean
   onToggleRecording: () => void
   localIdentity: string
   userId?: string
+  userName?: string
 }
 
 function VideoRoomContent({
   role, classe, isModerator, onLeave,
-  isRecording, canRecord, onToggleRecording, localIdentity, userId
+  isRecording, isRecordingLoading, canRecord, onToggleRecording, localIdentity, userId, userName
 }: VideoRoomContentProps) {
   const connectionState = useConnectionState()
   const room = useRoomContext()
@@ -769,8 +773,10 @@ export default function VideoRoom({
   roomName, token, serverUrl,
   isModerator = false,
   userId,
+  userName,
 }: VideoRoomProps) {
   const [isRecording, setIsRecording] = useState(false)
+  const [startedEgressIds, setStartedEgressIds] = useState<string[]>([])
   const permissionStreamRef = useRef<MediaStream | null>(null)
 
   // Identité locale extraite du token (décodage basique JWT)
@@ -786,7 +792,8 @@ export default function VideoRoom({
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
-          video: role === 'professeur',
+          //video: role === 'professeur',
+          video: false,
         })
         permissionStreamRef.current = stream
       } catch (err) {
@@ -801,13 +808,41 @@ export default function VideoRoom({
   }, [role])
 
   const canRecord = ['professeur', 'admin', 'direction'].includes(role)
-
+  const [isRecordingLoading, setIsRecordingLoading] = useState(false)
+  
   const toggleRecording = async () => {
-    if (!canRecord) return
-    console.log('🔴 Egress API à implémenter')
-    setIsRecording(v => !v)
+  if (!canRecord) return
+  setIsRecordingLoading(true)
+  
+  try {
+    if (isRecording && startedEgressIds.length > 0) {
+      // MODE ARRÊT : on envoie les IDs qu'on a démarrés
+      await api.post(`/classes/${classe.id}/toggle-recording/`, {
+        room_name: roomName,
+        egress_ids_to_stop: startedEgressIds
+      })
+      setIsRecording(false)
+      setStartedEgressIds([])
+      alert("⏹️ Enregistrement arrêté.")
+    } else {
+      // MODE DÉMARRAGE : on lance, on stocke les IDs
+      const res = await api.post(`/classes/${classe.id}/toggle-recording/`, {
+        room_name: roomName
+      })
+      if (res.data.status === 'started') {
+        const newIds = res.data.jobs.map((j: any) => j.egress_id)
+        setStartedEgressIds(prev => [...prev, ...newIds])
+        setIsRecording(true)
+        alert("🔴 Enregistrement démarré.")
+      }
+    }
+  } catch (err: any) {
+    alert("❌ " + (err.response?.data?.error || err.message))
+  } finally {
+    setIsRecordingLoading(false)
   }
-
+}
+//video={role === 'professeur'}
   return (
     <div className="h-full flex flex-col bg-neutral-900 rounded-lg overflow-hidden relative">
       <LiveKitRoom
@@ -815,7 +850,7 @@ export default function VideoRoom({
         token={token}
         connect={true}
         audio={true}
-        video={role === 'professeur'}
+        video={false}
         screen={['professeur', 'eleve'].includes(role)}
         options={{
           adaptiveStream: true,
@@ -834,10 +869,12 @@ export default function VideoRoom({
           isModerator={isModerator}
           onLeave={onLeave}
           isRecording={isRecording}
+          isRecordingLoading={isRecordingLoading}
           canRecord={canRecord}
           onToggleRecording={toggleRecording}
           localIdentity={localIdentity}
           userId={userId}
+          userName={userName}
         />
         <RoomAudioRenderer />
       </LiveKitRoom>
