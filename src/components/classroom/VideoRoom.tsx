@@ -484,7 +484,7 @@ function ControlBar({
   onToggleChat,
   unreadCount,
   isRecording,
-  isRecordingLoading
+  isRecordingLoading,
   canRecord,
   onToggleRecording,
 }: ControlBarProps) {
