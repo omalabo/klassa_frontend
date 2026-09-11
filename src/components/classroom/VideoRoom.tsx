@@ -15,6 +15,7 @@ import '@livekit/components-styles'
 import { Track, RoomEvent, VideoPresets, LocalParticipant } from 'livekit-client'
 import { Class, Seance } from '../../types'
 import api from '../../config/axios'
+import { Message } from '../../types'
 
 interface VideoRoomProps {
   classe: Class
@@ -26,6 +27,7 @@ interface VideoRoomProps {
   serverUrl: string
   isModerator?: boolean
   userId?: string
+  userName?: string
 }
 
 // ─────────────────────────────────────────────
@@ -82,185 +84,219 @@ const LeaveIcon = () => (
     <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
   </svg>
 )
+const MINI_CHAT_STYLES = `
+.mini-chat-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), background .18s ease, color .18s ease;
+}
+.mini-chat-icon-btn:hover {
+  transform: scale(1.08);
+}
+.mini-chat-icon-btn:active {
+  transform: scale(.92);
+}
+.mini-chat-icon-btn svg {
+  transition: transform .18s ease;
+}
+.mini-chat-attach-btn:hover svg {
+  transform: rotate(-10deg) scale(1.08);
+}
+.mini-chat-attach-active svg {
+  transform: rotate(-10deg) scale(1.05);
+}
+.mini-chat-mic-recording {
+  position: relative;
+  animation: mini-chat-mic-pulse 1.4s ease-in-out infinite;
+}
+.mini-chat-mic-recording:before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: rgba(239,68,68,.18);
+  animation: mini-chat-mic-ring 1.4s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes mini-chat-mic-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@keyframes mini-chat-mic-ring {
+  0% { transform: scale(.85); opacity: .8; }
+  70% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+`
 
+function MiniChatAttachIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  )
+}
+function MiniChatMicIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  )
+}
+function MiniChatStopIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="3" />
+    </svg>
+  )
+}
 // ─────────────────────────────────────────────
 // CHAT INTÉGRÉ MINIATURE (style Meet)
 // ─────────────────────────────────────────────
-// function MiniChat({ onClose, identity }: { onClose: () => void; identity: string }) {
-//   const { chatMessages, send, isSending } = useChat()
-//   const [input, setInput] = useState('')
-//   const bottomRef = useRef<HTMLDivElement>(null)
-
-//   useEffect(() => {
-//     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-//   }, [chatMessages])
-
-//   const handleSend = async () => {
-//     const msg = input.trim()
-//     if (!msg || isSending) return
-//     await send(msg)
-//     setInput('')
-//   }
-
-//   const handleKey = (e: React.KeyboardEvent) => {
-//     if (e.key === 'Enter' && !e.shiftKey) {
-//       e.preventDefault()
-//       handleSend()
-//     }
-//   }
-
-//   return (
-//     <div className="absolute bottom-24 right-4 z-40 w-80 flex flex-col bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl overflow-hidden"
-//          style={{ height: '420px' }}>
-//       {/* Header */}
-//       <div className="flex items-center justify-between px-4 py-3 bg-neutral-800 border-b border-neutral-700">
-//         <span className="text-white font-semibold text-sm tracking-wide">💬 Chat du cours</span>
-//         <button onClick={onClose}
-//           className="text-neutral-400 hover:text-white transition-colors rounded-full p-1 hover:bg-neutral-700">
-//           <CloseIcon />
-//         </button>
-//       </div>
-
-//       {/* Messages */}
-//       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 scrollbar-thin scrollbar-thumb-neutral-700">
-//         {chatMessages.length === 0 && (
-//           <p className="text-neutral-500 text-xs text-center mt-8">
-//             Aucun message pour l'instant...
-//           </p>
-//         )}
-//         {chatMessages.map((msg) => {
-//           const isMe = msg.from?.identity === identity
-//           return (
-//             <div key={msg.timestamp} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-//               {!isMe && (
-//                 <span className="text-xs text-neutral-400 mb-0.5 px-1">
-//                   {msg.from?.name || msg.from?.identity || 'Anonyme'}
-//                 </span>
-//               )}
-//               <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-snug ${
-//                 isMe
-//                   ? 'bg-primary-600 text-white rounded-br-sm'
-//                   : 'bg-neutral-700 text-neutral-100 rounded-bl-sm'
-//               }`}>
-//                 {msg.message}
-//               </div>
-//               <span className="text-xs text-neutral-600 mt-0.5 px-1">
-//                 {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-//               </span>
-//             </div>
-//           )
-//         })}
-//         <div ref={bottomRef} />
-//       </div>
-
-//       {/* Input */}
-//       <div className="px-3 py-3 border-t border-neutral-700 flex items-center gap-2">
-//         <input
-//           type="text"
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           onKeyDown={handleKey}
-//           placeholder="Écrire un message..."
-//           className="flex-1 bg-neutral-800 text-white text-sm rounded-xl px-3 py-2 outline-none border border-neutral-700 focus:border-primary-500 placeholder-neutral-500 transition-colors"
-//         />
-//         <button
-//           onClick={handleSend}
-//           disabled={!input.trim() || isSending}
-//           className="p-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-//         >
-//           <SendIcon />
-//         </button>
-//       </div>
-//     </div>
-//   )
-// }
-function ClassMiniChat({
-  classeId,
-  userId,
-  onClose
-}: {
+function MiniChat({ onClose, identity, classeId, userId, userName }: { 
+  onClose: () => void
+  identity: string
   classeId: string
   userId?: string
-  onClose: () => void
+  userName?: string
 }) {
-  const [messages, setMessages] = useState<any[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const firstLoad = useRef(true)
+  const [isRecording, setIsRecording] = useState(false)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [showAttachMenu, setShowAttachMenu] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+  const shouldAutoScroll = useRef(true)
+  const lastMsgIdRef = useRef<string | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const photoInputRef = useRef<HTMLInputElement>(null)
+  const docInputRef = useRef<HTMLInputElement>(null)
 
-  const getFullUrl = (url: string | null | undefined) => {
-    if (!url) return ''
-    if (url.startsWith('http://') || url.startsWith('https://')) return url
+  // Injecter les styles
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.id = 'mini-chat-styles'
+    style.textContent = MINI_CHAT_STYLES
+    document.head.appendChild(style)
+    return () => { document.getElementById('mini-chat-styles')?.remove() }
+  }, [])
 
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
-  }
-
-  const getExpediteurId = (msg: any) => {
-    return typeof msg.expediteur === 'object'
-      ? msg.expediteur?.id
-      : msg.expediteur
-  }
-
-  const loadMessages = useCallback(async () => {
-    try {
-      const res = await api.get('/messages/', {
-        params: { classe_id: classeId }
-      })
-
-      const msgs = res.data.results || []
-      setMessages(msgs)
-
-      if (userId) {
+  // Polling messages
+  useEffect(() => {
+    if (!classeId) return
+    const load = async () => {
+      try {
+        const res = await api.get('/messages/', { params: { classe_id: classeId } })
+        const msgs: Message[] = res.data.results || []
+        setMessages(prev => {
+          if (prev.length === msgs.length && prev[prev.length - 1]?.id === msgs[msgs.length - 1]?.id) {
+            return prev
+          }
+          return msgs
+        })
+        // Marquer comme lu
         msgs
-          .filter((m: any) => getExpediteurId(m) !== userId)
-          .forEach((m: any) => {
-            api.post(`/messages/${m.id}/lu/`).catch(() => {})
+          .filter(m => {
+            const expId = typeof m.expediteur === 'object' ? (m.expediteur as any)?.id : m.expediteur
+            return expId !== userId
           })
-      }
-    } catch {
-      // silencieux
+          .forEach(m => api.post(`/messages/${m.id}/lu/`).catch(() => {}))
+      } catch {}
     }
+    load()
+    const interval = setInterval(load, 3000)
+    return () => clearInterval(interval)
   }, [classeId, userId])
 
-  useEffect(() => {
-    loadMessages()
-    const interval = setInterval(loadMessages, 3000)
-    return () => clearInterval(interval)
-  }, [loadMessages])
+  // Scroll intelligent
+  const handleChatScroll = () => {
+    const el = chatScrollRef.current
+    if (!el) return
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    shouldAutoScroll.current = distanceFromBottom < 150
+  }
 
   useEffect(() => {
-    if (messages.length > 0) {
-      bottomRef.current?.scrollIntoView({
-        behavior: firstLoad.current ? 'auto' : 'smooth'
+    if (messages.length === 0) return
+    const container = chatScrollRef.current
+    if (!container) return
+    const lastMessage = messages[messages.length - 1]
+    const lastId = lastMessage.id
+    const isFirstLoad = lastMsgIdRef.current === null
+    const hasNewMessage = lastMsgIdRef.current !== null && lastMsgIdRef.current !== lastId
+    const expId = typeof lastMessage.expediteur === 'object'
+      ? (lastMessage.expediteur as any)?.id
+      : lastMessage.expediteur
+    const lastIsMine = expId === userId
+
+    if (isFirstLoad || (hasNewMessage && lastIsMine) || (hasNewMessage && shouldAutoScroll.current)) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: isFirstLoad ? 'auto' : 'smooth'
       })
-      firstLoad.current = false
     }
-  }, [messages])
+    lastMsgIdRef.current = lastId
+  }, [messages, userId])
 
-  const handleSend = async () => {
-    const text = input.trim()
+  // Enregistrement vocal
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data)
+      }
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        setAudioBlob(blob)
+        stream.getTracks().forEach(track => track.stop())
+      }
+      mediaRecorder.start()
+      setIsRecording(true)
+    } catch (err) {
+      alert("❌ Accès au microphone refusé.")
+    }
+  }
 
-    if ((!text && !selectedFile) || isSending) return
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+    }
+  }
 
-    setIsSending(true)
-
+  // Envoyer message
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if ((!input.trim() && selectedFiles.length === 0 && !audioBlob) || !classeId) return
+    
+    shouldAutoScroll.current = true
     try {
       const formData = new FormData()
       formData.append('classe_id', classeId)
-      formData.append('contenu', text)
+      formData.append('contenu', input)
 
-      if (selectedFile) {
-        formData.append('fichier', selectedFile)
-
+      if (audioBlob) {
+        const audioFile = new File([audioBlob], `vocal_${Date.now()}.webm`, { type: 'audio/webm' })
+        formData.append('fichier', audioFile)
+        formData.append('type_message', 'audio')
+        formData.append('is_voice_note', 'true')
+      } else if (selectedFiles.length > 0) {
+        const file = selectedFiles[0]
+        formData.append('fichier', file)
         let typeMsg = 'fichier'
-        if (selectedFile.type.startsWith('image/')) typeMsg = 'image'
-        else if (selectedFile.type.startsWith('video/')) typeMsg = 'video'
-        else if (selectedFile.type.startsWith('audio/')) typeMsg = 'audio'
-
+        if (file.type.startsWith('image/')) typeMsg = 'image'
+        else if (file.type.startsWith('video/')) typeMsg = 'video'
+        else if (file.type.startsWith('audio/')) typeMsg = 'audio'
         formData.append('type_message', typeMsg)
         formData.append('is_voice_note', 'false')
       } else {
@@ -271,47 +307,33 @@ function ClassMiniChat({
       await api.post('/messages/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-
       setInput('')
-      setSelectedFile(null)
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-
-      await loadMessages()
-    } catch {
+      setSelectedFiles([])
+      setAudioBlob(null)
+      if (photoInputRef.current) photoInputRef.current.value = ''
+      if (docInputRef.current) docInputRef.current.value = ''
+    } catch (err) {
+      console.error("Erreur envoi message", err)
       alert("❌ Échec de l'envoi du message")
-    } finally {
-      setIsSending(false)
     }
   }
 
-  const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
-  const getFileIcon = (file: File) => {
-    if (file.type.startsWith('image/')) return '🖼️'
-    if (file.type.startsWith('video/')) return '🎬'
-    if (file.type.startsWith('audio/')) return '🎵'
-    return '📄'
+  const getFullUrl = (url: string | null | undefined) => {
+    if (!url) return ''
+    if (url.startsWith('http://') || url.startsWith('https://')) return url
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
   }
 
   return (
-    <div
+    <div 
       className="absolute bottom-24 right-4 z-40 w-80 flex flex-col bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl overflow-hidden"
-      style={{ height: '420px' }}
+      style={{ height: '480px' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-neutral-800 border-b border-neutral-700">
-        <span className="text-white font-semibold text-sm tracking-wide">
-          💬 Chat
-        </span>
-        <button
+        <span className="text-white font-semibold text-sm tracking-wide">💬 Chat</span>
+        <button 
           onClick={onClose}
           className="text-neutral-400 hover:text-white transition-colors rounded-full p-1 hover:bg-neutral-700"
         >
@@ -320,147 +342,198 @@ function ClassMiniChat({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 scrollbar-thin scrollbar-thumb-neutral-700">
-        {messages.length === 0 && (
+      <div 
+        ref={chatScrollRef}
+        onScroll={handleChatScroll}
+        className="flex-1 overflow-y-auto px-3 py-3 space-y-2 scrollbar-thin scrollbar-thumb-neutral-700"
+        style={{ 
+          background: '#efeae2',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E")`
+        }}
+      >
+        {messages.length === 0 ? (
           <p className="text-neutral-500 text-xs text-center mt-8">
-            ----------------
+            Aucun message pour l'instant...
           </p>
-        )}
-
-        {messages.map((msg: any) => {
-          const isMe = getExpediteurId(msg) === userId
-          const fileUrl = getFullUrl(msg.fichier_url)
-
-          return (
-            <div
-              key={msg.id}
-              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-            >
-              {!isMe && (
-                <span className="text-xs text-neutral-400 mb-0.5 px-1">
-                  {msg.expediteur_nom || msg.expediteur?.display_name || 'Utilisateur'}
-                </span>
-              )}
-
-              <div
-                className={`max-w-[85%] rounded-2xl text-sm leading-snug overflow-hidden ${
-                  isMe
-                    ? 'bg-primary-600 text-white rounded-br-sm'
-                    : 'bg-neutral-700 text-neutral-100 rounded-bl-sm'
-                }`}
-              >
-                {msg.contenu && (
-                  <div className="px-3 py-2 whitespace-pre-wrap">
-                    {msg.contenu}
-                  </div>
+        ) : (
+          messages.map((msg) => {
+            const expId = typeof msg.expediteur === 'object' ? (msg.expediteur as any)?.id : msg.expediteur
+            const isMe = expId === userId
+            const fileUrl = getFullUrl(msg.fichier_url)
+            
+            return (
+              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                {!isMe && (
+                  <span className="text-xs text-neutral-600 mb-0.5 px-1 font-semibold">
+                    {msg.expediteur_nom || 'Utilisateur'}
+                  </span>
                 )}
-
-                {msg.type_message === 'image' && fileUrl && (
-                  <img
-                    src={fileUrl}
-                    alt=""
-                    className="max-w-full max-h-40 object-cover"
-                  />
-                )}
-
-                {msg.type_message === 'video' && fileUrl && (
-                  <video
-                    controls
-                    src={fileUrl}
-                    className="max-w-full max-h-40"
-                  />
-                )}
-
-                {msg.type_message === 'audio' && fileUrl && (
-                  <div className="px-3 py-2 flex items-center gap-2">
-                    <span>{msg.is_voice_note ? '🎤' : '🎵'}</span>
-                    <audio
-                      controls
-                      src={fileUrl}
-                      className="h-8 max-w-[180px]"
+                <div 
+                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-snug ${
+                    isMe
+                      ? 'bg-green-100 text-gray-900 rounded-br-sm'
+                      : 'bg-white text-gray-900 rounded-bl-sm'
+                  }`}
+                  style={{
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  {/* Texte */}
+                  {msg.contenu && (
+                    <div className="whitespace-pre-wrap">{msg.contenu}</div>
+                  )}
+                  
+                  {/* Image */}
+                  {msg.type_message === 'image' && fileUrl && (
+                    <img 
+                      src={fileUrl} 
+                      alt="Aperçu" 
+                      className="max-w-full rounded-lg mt-1 cursor-pointer"
+                      style={{ maxHeight: '200px' }}
+                      onClick={() => window.open(fileUrl, '_blank')}
                     />
+                  )}
+                  
+                  {/* Vidéo */}
+                  {msg.type_message === 'video' && fileUrl && (
+                    <video 
+                      controls 
+                      src={fileUrl} 
+                      className="max-w-full rounded-lg mt-1"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  )}
+                  
+                  {/* Audio */}
+                  {msg.type_message === 'audio' && fileUrl && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span>{msg.is_voice_note ? '🎤' : '🎵'}</span>
+                      <audio controls src={fileUrl} className="h-8" style={{ maxWidth: '180px' }} />
+                    </div>
+                  )}
+                  
+                  {/* Fichier */}
+                  {msg.type_message === 'fichier' && fileUrl && (
+                    <a 
+                      href={fileUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 mt-1 text-blue-600 hover:underline"
+                    >
+                      📄 {msg.nom_fichier || 'Document'}
+                    </a>
+                  )}
+                  
+                  {/* Heure */}
+                  <div className={`text-xs mt-1 ${isMe ? 'text-green-700' : 'text-gray-500'}`}>
+                    {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                )}
-
-                {msg.type_message === 'fichier' && fileUrl && (
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 underline"
-                  >
-                    📄 {msg.nom_fichier || 'Document'}
-                  </a>
-                )}
+                </div>
               </div>
-
-              <span className="text-xs text-neutral-600 mt-0.5 px-1">
-                {new Date(msg.created_at).toLocaleTimeString('fr-FR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
-            </div>
-          )
-        })}
-
-        <div ref={bottomRef} />
+            )
+          })
+        )}
       </div>
 
-      {/* Fichier sélectionné */}
-      {selectedFile && (
-        <div className="px-3 pt-2 flex items-center justify-between gap-2 text-xs text-neutral-300">
-          <div className="flex items-center gap-2 truncate">
-            <span>{getFileIcon(selectedFile)}</span>
-            <span className="truncate">{selectedFile.name}</span>
-          </div>
-          <button
-            onClick={() => setSelectedFile(null)}
-            className="text-neutral-400 hover:text-white"
-          >
-            ✕
-          </button>
+      {/* Input cachés */}
+      <input type="file" ref={photoInputRef} accept="image/*,video/*" multiple style={{ display: 'none' }} onChange={(e) => { if (e.target.files) setSelectedFiles(Array.from(e.target.files)); setShowAttachMenu(false) }} />
+      <input type="file" ref={docInputRef} multiple style={{ display: 'none' }} onChange={(e) => { if (e.target.files) setSelectedFiles(Array.from(e.target.files)); setShowAttachMenu(false) }} />
+
+      {/* Prévisualisation fichiers */}
+      {(selectedFiles.length > 0 || audioBlob) && (
+        <div className="px-3 py-2 bg-neutral-800 border-t border-neutral-700 flex flex-wrap gap-2">
+          {selectedFiles.map((file, index) => (
+            <div key={index} className="flex items-center gap-2 px-2 py-1 bg-neutral-700 rounded-lg text-xs text-white">
+              <span>{file.type.startsWith('image/') ? '🖼️' : file.type.startsWith('video/') ? '🎬' : '📄'}</span>
+              <span className="max-w-[80px] truncate">{file.name}</span>
+              <button type="button" onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))} className="text-red-400 hover:text-red-300">✕</button>
+            </div>
+          ))}
+          {audioBlob && (
+            <div className="flex items-center gap-2 px-2 py-1 bg-green-900/30 rounded-lg text-xs text-green-300">
+              <span>🎤</span>
+              <span>Vocal prêt</span>
+              <button type="button" onClick={() => setAudioBlob(null)} className="text-red-400 hover:text-red-300">✕</button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Input */}
-      <div className="px-3 py-3 border-t border-neutral-700 flex items-center gap-2">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={e => setSelectedFile(e.target.files?.[0] ?? null)}
-        />
+      {/* Menu attachement */}
+      {showAttachMenu && (
+        <>
+          <div className="absolute inset-0 z-10" onClick={() => setShowAttachMenu(false)} />
+          <div className="absolute bottom-16 left-3 z-20 bg-white rounded-xl shadow-2xl p-2 flex flex-col gap-1 min-w-[180px]">
+            <button 
+              type="button" 
+              onClick={() => photoInputRef.current?.click()} 
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-left"
+            >
+              <span className="bg-blue-100 p-2 rounded-full text-lg">📷</span>
+              <div>
+                <div className="font-semibold text-sm text-gray-900">Photo & Vidéo</div>
+                <div className="text-xs text-gray-500">Galerie ou caméra</div>
+              </div>
+            </button>
+            <div className="h-px bg-gray-200" />
+            <button 
+              type="button" 
+              onClick={() => docInputRef.current?.click()} 
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-left"
+            >
+              <span className="bg-purple-100 p-2 rounded-full text-lg">📄</span>
+              <div>
+                <div className="font-semibold text-sm text-gray-900">Document</div>
+                <div className="text-xs text-gray-500">PDF, Word, etc.</div>
+              </div>
+            </button>
+          </div>
+        </>
+      )}
 
+      {/* Barre de saisie */}
+      <form onSubmit={handleSendMessage} className="px-3 py-3 border-t border-neutral-700 flex items-center gap-2">
+        {/* Attachement */}
         <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl border border-neutral-700 transition-colors"
+          type="button"
+          onClick={() => setShowAttachMenu(!showAttachMenu)}
+          className={`mini-chat-icon-btn mini-chat-attach-btn${showAttachMenu ? ' mini-chat-attach-active' : ''} w-9 h-9 rounded-full text-neutral-400 hover:text-blue-400 hover:bg-neutral-800`}
           title="Joindre un fichier"
         >
-          📎
+          <MiniChatAttachIcon />
         </button>
 
+        {/* Input texte */}
         <input
           type="text"
           value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder="..."
-          className="flex-1 bg-neutral-800 text-white text-sm rounded-xl px-3 py-2 outline-none border border-neutral-700 focus:border-primary-500 placeholder-neutral-500 transition-colors"
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Écrire un message..."
+          className="flex-1 bg-neutral-800 text-white text-sm rounded-xl px-3 py-2 outline-none border border-neutral-700 focus:border-blue-500 placeholder-neutral-500 transition-colors"
         />
 
+        {/* Micro */}
         <button
-          onClick={handleSend}
-          disabled={(!input.trim() && !selectedFile) || isSending}
-          className="p-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+          type="button"
+          onClick={isRecording ? stopRecording : startRecording}
+          className={`mini-chat-icon-btn w-9 h-9 rounded-full ${isRecording ? 'bg-red-500 text-white mini-chat-mic-recording' : 'text-neutral-400 hover:text-white hover:bg-neutral-800'}`}
+          title={isRecording ? "Arrêter" : "Note vocale"}
+        >
+          {isRecording ? <MiniChatStopIcon /> : <MiniChatMicIcon />}
+        </button>
+
+        {/* Envoyer */}
+        <button
+          type="submit"
+          disabled={!input.trim() && selectedFiles.length === 0 && !audioBlob}
+          className="w-9 h-9 bg-green-500 hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center justify-center"
         >
           <SendIcon />
         </button>
-      </div>
+      </form>
     </div>
   )
 }
-
 
 // ─────────────────────────────────────────────
 // BARRE DE CONTRÔLES PRINCIPALE
@@ -491,7 +564,8 @@ function ControlBar({
   const { localParticipant } = useLocalParticipant()
 
   const [micEnabled, setMicEnabled] = useState(true)
-  const [camEnabled, setCamEnabled] = useState(role === 'professeur')
+  //const [camEnabled, setCamEnabled] = useState(role === 'professeur')
+  const [camEnabled, setCamEnabled] = useState(false)
   const [screenSharing, setScreenSharing] = useState(false)
 
   const canShareScreen = ['professeur', 'eleve'].includes(role)
@@ -571,19 +645,19 @@ function ControlBar({
         <div className="w-px h-8 bg-neutral-700 mx-1" />
 
         {/* ── ENREGISTREMENT ── */}
-        {/* {canRecord && (
+        {canRecord && (
           <ControlButton
             active={isRecording}
             onClick={onToggleRecording}
+            disabled={isRecordingLoading}
             activeLabel="Stop enregistrement"
             inactiveLabel="Enregistrer"
             activeColor="bg-danger-600 hover:bg-danger-700 animate-pulse"
             inactiveColor="bg-neutral-700 hover:bg-neutral-600"
-            activeIcon={<span className="text-sm font-bold">⏹</span>}
-            inactiveIcon={<span className="w-3 h-3 rounded-full bg-danger-500 block" />}
-            disabled={false}
+            activeIcon={isRecordingLoading ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="text-sm font-bold">⏹</span>}
+            inactiveIcon={isRecordingLoading ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="w-3 h-3 rounded-full bg-red-500 block" />}
           />
-        )} */}
+        )}
 
         {/* ── CHAT ── */}
         <div className="relative">
@@ -606,7 +680,7 @@ function ControlBar({
         </div>
 
         {/* ── SÉPARATEUR ── */}
-        {/* <div className="w-px h-8 bg-neutral-700 mx-1" /> */}
+        <div className="w-px h-8 bg-neutral-700 mx-1" />
 
         {/* ── QUITTER ── */}
         <button
@@ -615,7 +689,7 @@ function ControlBar({
           className="flex items-center gap-2 px-4 py-2 bg-danger-600 hover:bg-danger-700 text-white rounded-xl text-sm font-semibold transition-all shadow-lg hover:shadow-danger-600/30"
         >
           <LeaveIcon />
-          {/* <span className="hidden sm:inline">Quitter</span> */}
+          <span className="hidden sm:inline">Quitter</span>
         </button>
       </div>
     </div>
@@ -674,26 +748,24 @@ interface VideoRoomContentProps {
 
 function VideoRoomContent({
   role, classe, isModerator, onLeave,
-  isRecording, isRecordingLoading, canRecord, onToggleRecording, localIdentity, userId, userName
+  isRecording, isRecordingLoading, canRecord, onToggleRecording, localIdentity,
+  userId, userName
 }: VideoRoomContentProps) {
   const connectionState = useConnectionState()
   const room = useRoomContext()
-  // const { chatMessages } = useChat()
-
-  // const [isChatOpen, setIsChatOpen] = useState(false)
-  // const [unreadCount, setUnreadCount] = useState(0)
-  // const prevMsgCount = useRef(0)
-
-  // // Compteur messages non lus quand chat fermé
-  // useEffect(() => {
-  //   if (!isChatOpen && chatMessages.length > prevMsgCount.current) {
-  //     setUnreadCount(c => c + (chatMessages.length - prevMsgCount.current))
-  //   }
-  //   prevMsgCount.current = chatMessages.length
-  // }, [chatMessages, isChatOpen])
+  const { chatMessages } = useChat()
 
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const unreadCount = 0
+  const [unreadCount, setUnreadCount] = useState(0)
+  const prevMsgCount = useRef(0)
+
+  // Compteur messages non lus quand chat fermé
+  useEffect(() => {
+    if (!isChatOpen && chatMessages.length > prevMsgCount.current) {
+      setUnreadCount(c => c + (chatMessages.length - prevMsgCount.current))
+    }
+    prevMsgCount.current = chatMessages.length
+  }, [chatMessages, isChatOpen])
 
   const handleToggleChat = () => {
     setIsChatOpen(v => !v)
@@ -742,10 +814,12 @@ function VideoRoomContent({
 
         {/* ── CHAT MINIATURE ── */}
         {isChatOpen && (
-          <ClassMiniChat
-            onClose={handleToggleChat}
+          <MiniChat 
+            onClose={handleToggleChat} 
+            identity={localIdentity}
             classeId={classe.id}
-            userId={userId || localIdentity}
+            userId={userId}
+            userName={userName}
           />
         )}
 
@@ -757,6 +831,7 @@ function VideoRoomContent({
           onToggleChat={handleToggleChat}
           unreadCount={unreadCount}
           isRecording={isRecording}
+          isRecordingLoading={isRecordingLoading}
           canRecord={canRecord}
           onToggleRecording={onToggleRecording}
         />
