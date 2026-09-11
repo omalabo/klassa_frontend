@@ -3668,7 +3668,9 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                         token={liveKitSession.token}
                         serverUrl={liveKitSession.serverUrl}
                         isModerator={(role === 'admin' || role === 'direction') ? false : liveKitSession.isModerator}
-                        userId={user?.id}
+                        userId={user?.id}             
+                        userName={user?.display_name || user?.prenom}
+
                       />
                     ) : (
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', position: 'relative', overflow: 'hidden', padding: '2rem' }}>
