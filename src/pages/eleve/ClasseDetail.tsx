@@ -1370,31 +1370,76 @@ function CollaborativeWhiteboard({ classeId, seanceId, role }: WhiteboardProps) 
 }
 
 // ─── Composant ReadReceipts (Style Telegram) ─────────────────────────────
-function MessageReadReceipts({ msg, userId, className }: { msg: Message; userId: string; className?: string }) {
+
+function MessageReadReceipts({ msg, userId, user, headerInscriptions, usersData, className }: { 
+  msg: Message; 
+  userId: string; 
+  user: any; 
+  headerInscriptions: any;
+  usersData: any;
+  className?: string 
+}) {
 const [showReadBy, setShowReadBy] = useState(false)
 const expId = typeof msg.expediteur === 'object' ? (msg.expediteur as any)?.id : msg.expediteur
 
+// DEBUG: Logger les données du message
+console.log('🔍 MessageReadReceipts - Message:', {
+  msgId: msg.id,
+  expediteur: msg.expediteur,
+  expId,
+  userId,
+  isMe: expId === userId,
+  recu_par: msg.recu_par,
+  lu_par_ids: msg.lu_par_ids,
+  msg
+})
+
 // Ne montrer que pour les messages de l'utilisateur
-if (expId !== userId) return null
+if (expId !== userId) {
+  console.log('⚠️ Pas mon message, return null')
+  return null
+}
 
 const recuPar: string[] = msg.recu_par ?? []
 const luPar: string[] = msg.lu_par_ids ?? []
 const totalRecipients = recuPar.length + luPar.length
 
+console.log('✅ Mon message - Données:', { recuPar, luPar, totalRecipients })
+
 // Si personne n'a reçu le message
 if (totalRecipients === 0) {
-return (
-  <span style={{ color: '#9ca3af', fontSize: 13, cursor: 'default' }}>✓</span>
-)
+  console.log('📭 Personne n\'a reçu le message')
+  return (
+    <span style={{ color: '#9ca3af', fontSize: 13, cursor: 'default' }}>✓</span>
+  )
 }
 
 // Si certains ont lu
 const hasRead = luPar.length > 0
 
+console.log('📊 Affichage:', { hasRead, totalRecipients })
+
+// Résoudre un ID en nom d'utilisateur
+const getUserName = (userId: string): string => {
+  if (userId === user?.id) return 'Vous'
+  // Chercher dans les inscriptions de la classe
+  const inscrit = headerInscriptions?.results?.find((i: any) => i.eleve_id === userId || i.user?.id === userId)
+  if (inscrit?.eleve_nom) return inscrit.eleve_nom
+  // Chercher dans les utilisateurs (profs)
+  const u = usersData?.results?.find((u: any) => u.id === userId)
+  if (u?.display_name) return u.display_name
+  // Fallback
+  return userId.substring(0, 8) + '…'
+}
+
 return (
 <>
   <span
-    onClick={(e) => { e.stopPropagation(); setShowReadBy(true) }}
+    onClick={(e) => { 
+      e.stopPropagation(); 
+      console.log('🖱️ Clic sur les coches, ouverture popup');
+      setShowReadBy(true) 
+    }}
     style={{
       color: hasRead ? '#3b82f6' : '#9ca3af',
       fontSize: 13,
@@ -1432,6 +1477,9 @@ return (
         onClick={(e) => e.stopPropagation()}
         style={{
           position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           zIndex: 91,
           background: '#fff',
           borderRadius: 12,
@@ -1573,7 +1621,7 @@ return (
                     fontWeight: 700,
                     flexShrink: 0
                   }}>
-                    {receiverId.charAt(0).toUpperCase()}
+                    {getUserName(receiverId).charAt(0).toUpperCase()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
@@ -1584,7 +1632,7 @@ return (
                       overflow: 'hidden',
                       textOverflow: 'ellipsis'
                     }}>
-                      {receiverId}
+                      {getUserName(receiverId)}
                     </div>
                     <div style={{ fontSize: 11, color: '#9ca3af' }}>
                       ✓ Reçu
@@ -1612,6 +1660,8 @@ return (
 </>
 )
 }
+
+
 // ─── Icônes chat ───────────────────────────────────────────
 function ChatAttachIcon() {
   return (
@@ -4208,7 +4258,13 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                                       >
                                         ↩️
                                       </button>
-                                      {isMe && <MessageReadReceipts msg={msg} userId={user?.id ?? ''} />}
+                                      {isMe && <MessageReadReceipts 
+                                          msg={msg} 
+                                          userId={user?.id ?? ''} 
+                                          user={user}
+                                          headerInscriptions={headerInscriptions}
+                                          usersData={usersData}
+                                        />}
                                     </div>
 
                                   </div>
