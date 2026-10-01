@@ -100,6 +100,7 @@ function App() {
   const { user, token, mustChangePassword } = useAppSelector(selectAuth)
 
   return (
+    <PartageProvider>
     <Routes>
       {/* 🔐 Routes publiques - accessibles sans authentification */}
       {/* <Route path="/login" element={
@@ -213,6 +214,7 @@ function App() {
         </div>
       } />
     </Routes>
+    </PartageProvider>
   )
 }
 
