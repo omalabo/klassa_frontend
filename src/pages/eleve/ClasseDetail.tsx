@@ -37,6 +37,11 @@ import SubmitFactureModal from '../../components/shared/Submitfacturemodal'
 import { AnnonceEleveCard } from '../direction/Annonces'  // ajustez le chemin selon votre structure
 import { useAppLanguage } from '../../i18n/appLanguage'
 import ConfirmModal from '../../components/shared/ConfirmModal'
+
+import { PartageProvider, usePartage } from '../../context/PartageContext'
+import EditeurClasse from '../../components/classroom/EditeurClasse'
+import LivresClasse from '../../components/classroom/LivresClasse'
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface ClasseDetailProps { role: 'eleve' | 'professeur' | 'admin' | 'direction' }
 interface LiveKitSession {
@@ -1515,6 +1520,7 @@ function ChatStopIcon() {
 }
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function ClasseDetail({ role }: ClasseDetailProps) {
+  const partage = usePartage()
   const { t } = useAppLanguage()
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
@@ -1523,7 +1529,7 @@ export default function ClasseDetail({ role }: ClasseDetailProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatScrollRef = useRef<HTMLDivElement>(null)
   const shouldAutoScroll = useRef(true)
-  const [activeTab, setActiveTab] = useState<'salle' | 'chat' | 'tableau' | 'supports' | 'facture' | 'infos'| 'annonces'>((searchParams.get('tab') as any) || 'chat')
+  const [activeTab, setActiveTab] = useState<'salle' | 'chat' | 'tableau' | 'supports' | 'facture' | 'infos'| 'annonces' | 'editeur' | 'livres'>((searchParams.get('tab') as any) || 'chat')
   const [messageText, setMessageText] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   // État principal : classe active à droite & classes sélectionnées à gauche
@@ -2166,6 +2172,9 @@ const handleCopyShareLink = async () => {
     
     const [leftPanelOpen, setLeftPanelOpen] = useState(true)
 
+    const [livreAImporter, setLivreAImporter] = useState<any>(null) // 🆕
+
+  
 
     useEffect(() => {
       if (showSearchClassModal && role === 'eleve') {
@@ -2784,8 +2793,13 @@ const handleEditSeance = (seance: Seance) => {
     finally { setUploadingStudentFiles(prev => ({ ...prev, [devoirId]: false })) }
   }
   const handleDownloadFile = (file: any) => { const l = document.createElement('a'); l.href = file.fichier_url || `/api/fichiers/${file.id}/download/`; l.download = file.nom_original; l.click() }
- 
 
+  
+useEffect(() => {
+    partage.setActiveSession(activeClassId, defaultSeanceId, user?.id, user?.display_name)
+  }, [activeClassId, defaultSeanceId, user?.id])
+
+  
 
   // ═══════════════════════════════════════════════════════════════
   // 🆕 NOUVEAU : Gestion de l'enregistrement vocal
@@ -2931,7 +2945,8 @@ const handleSendMessage = async (e: React.FormEvent) => {
         : []),
       { id: 'chat', icon: '💬', label: t('chat') , hasAlert: unreadNotifs.some(n => n.classe === activeClassId && CHAT_BADGE_TYPES.includes(n.type))},
       { id: 'salle', icon: '🎥', label: t('classroom'), hasAlert: unreadNotifs.some(n => n.classe === activeClassId && SALLE_BADGE_TYPES.includes(n.type)) },
-      
+      { id: 'editeur', icon: '📝', label: 'Éditeur', hasAlert: unreadNotifs.some(n => n.classe === activeClassId) && false },
+      { id: 'livres', icon: '📚', label: 'Livres' },
       /* { id: 'tableau', icon: '🖊️', label: 'Tableau' }, */
       /* { id: 'supports', icon: '📁', label: t('materials') }, */
       /* 
