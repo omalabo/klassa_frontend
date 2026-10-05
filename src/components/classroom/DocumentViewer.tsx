@@ -8,7 +8,7 @@ import {
   useCallback,
 } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
-import mammoth from 'mamth'
+import mammoth from 'mammoth'
 
 // Worker PDF stable
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
@@ -230,7 +230,7 @@ const DocumentViewer = forwardRef<DocumentViewerHandle, Props>(
           else if (typeFichier === 'pptx') {
             // Chargement dynamique de pptxjs pour éviter les erreurs Vite
             await loadScript('https://cdn.jsdelivr.net/npm/pptxjs@1.21.0/js/pptxjs.min.js')
-            await loadScript('https://cdn.jsdelivr.net/npm/pptxjs@1.21.0/js/divs2slides.minاقل.js') // Note: divs2slides est souvent inclus, mais on charge au cas où
+            await loadScript('https://cdn.jsdelivr.net/npm/pptxjs@1.21.0/js/divs2slides.min.js') // Note: divs2slides est souvent inclus, mais on charge au cas où
             
             // @ts-ignore
             const pptx = new window.pptxjs({ url: fichierUrl })
