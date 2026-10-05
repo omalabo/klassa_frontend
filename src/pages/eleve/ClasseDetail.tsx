@@ -39,7 +39,7 @@ import { useAppLanguage } from '../../i18n/appLanguage'
 import ConfirmModal from '../../components/shared/ConfirmModal'
 
 import { PartageProvider, usePartage } from '../../context/PartageContext'
-import EditeurClasse from '../../components/classroom/EditeurClasse'
+import PresentationMode from '../../components/classroom/PresentationMode'
 import LivresClasse from '../../components/classroom/LivresClasse'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -2945,8 +2945,8 @@ const handleSendMessage = async (e: React.FormEvent) => {
         : []),
       { id: 'chat', icon: '💬', label: t('chat') , hasAlert: unreadNotifs.some(n => n.classe === activeClassId && CHAT_BADGE_TYPES.includes(n.type))},
       { id: 'salle', icon: '🎥', label: t('classroom'), hasAlert: unreadNotifs.some(n => n.classe === activeClassId && SALLE_BADGE_TYPES.includes(n.type)) },
-      { id: 'editeur', icon: '📝', label: 'Éditeur', hasAlert: unreadNotifs.some(n => n.classe === activeClassId) && false },
-      { id: 'livres', icon: '📚', label: 'Livres' },
+      { id: 'editeur', icon: '🎬', label: 'Présentation', hasAlert: false },
+      { id: 'livres', icon: '📝', label: 'Livres' },
       /* { id: 'tableau', icon: '🖊️', label: 'Tableau' }, */
       /* { id: 'supports', icon: '📁', label: t('materials') }, */
       /* 
@@ -4300,6 +4300,23 @@ style={{ padding: '3px 6px', borderRadius: 6, fontSize: 10, background: '#f1f5f9
                       </div>
                     )}
                   </div>
+                )}
+
+
+                {activeTab === 'editeur' && activeClassId && defaultSeanceId && (
+                  <PresentationMode
+                    classeId={activeClassId}
+                    seanceId={defaultSeanceId}
+                    role={role === 'admin' || role === 'direction' ? 'eleve' : role}
+                    userId={user?.id}
+                    userName={user?.display_name || user?.prenom}
+                  />
+                )}
+                {activeTab === 'livres' && activeClassId && (
+                  <LivresClasse
+                    classeId={activeClassId}
+                    role={role}
+                  />
                 )}
 
                 {activeTab === 'facture' && role === 'eleve' && (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 15 }}>💰 Section Facture (à développer)</div>)}
